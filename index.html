@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>firstimpression® · Du får kun én chance</title>
+<meta name="description" content="Webdesign studio i Horsens. Vi bygger websites, der vinder kunden i de første 50 millisekunder.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141412'/%3E%3Ctext x='16' y='48' font-family='Helvetica,Arial' font-size='44' font-weight='700' fill='%23F2F0EB'%3Ef%3C/text%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   01 · TOKENS
+   Two colors, one accent. Three type voices. Two easings.
+   Everything on this page draws from these and nothing else.
+   ============================================================ */
+:root{
+  --bone:#F2F0EB;
+  --ink:#141412;
+  --gray:#8C8983;
+  --accent:#B7A98F;
+  --line-bone:rgba(20,20,18,.16);
+  --line-ink:rgba(242,240,235,.18);
+  --font-sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-serif:Georgia,"Times New Roman",serif;
+  --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --e-out:cubic-bezier(.16,1,.3,1);
+  --e-io:cubic-bezier(.83,0,.17,1);
+  --d-fast:.45s;
+  --d-base:.9s;
+  --d-slow:1.3s;
+  --pad:clamp(20px,5vw,72px);
+}
+
+/* ============================================================
+   02 · RESET + BASE (mobile first)
+   ============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{
+  background:var(--bone);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:16px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:var(--accent);color:var(--ink)}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--bone)}
+::-webkit-scrollbar-thumb{background:var(--ink);border:3px solid var(--bone)}
+
+.mono{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.serif-i{font-family:var(--font-serif);font-style:italic;font-weight:400;text-transform:none;letter-spacing:0}
+
+.section{padding:clamp(90px,14vw,170px) var(--pad)}
+.section-ink{background:var(--ink);color:var(--bone)}
+.eyebrow{display:flex;align-items:center;gap:14px;margin-bottom:clamp(34px,6vw,70px);color:inherit;opacity:.95}
+.eyebrow::after{content:"";height:1px;flex:1;background:currentColor;opacity:.25}
+
+/* ============================================================
+   03 · INTRO · the 50 millisecond moment
+   The site opens by performing its own thesis.
+   ============================================================ */
+#intro{
+  position:fixed;inset:0;z-index:100;
+  background:var(--ink);color:var(--bone);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:clamp(20px,4vw,44px);
+  cursor:pointer;
+  transition:transform var(--d-base) var(--e-io);
+}
+#intro.done{transform:translateY(-101%)}
+#intro.fast{transition-duration:.35s}
+.intro-top{display:flex;justify-content:space-between;gap:12px}
+.intro-mid{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.intro-count{
+  font-family:var(--font-mono);
+  font-size:clamp(64px,18vw,160px);
+  font-weight:400;letter-spacing:-.02em;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.intro-count small{font-size:.22em;letter-spacing:.14em;vertical-align:.5em;margin-left:.4em}
+.intro-line{
+  font-family:var(--font-serif);font-style:italic;
+  font-size:clamp(16px,2.6vw,24px);
+  opacity:0;transform:translateY(10px);
+  transition:opacity .6s var(--e-out),transform .6s var(--e-out);
+}
+.intro-line.show{opacity:1;transform:none}
+.intro-bottom{display:flex;justify-content:space-between;gap:12px;opacity:.55}
+
+/* ============================================================
+   04 · FIXED CHROME · header, progress, grain, cursor
+   ============================================================ */
+.site-head{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px var(--pad);
+  mix-blend-mode:difference;color:#fff;
+  pointer-events:none;
+}
+.site-head a,.site-head span{pointer-events:auto}
+.head-brand{font-weight:700;letter-spacing:-.02em;font-size:15px}
+.head-nav{display:flex;gap:clamp(14px,3vw,30px)}
+.head-nav a{position:relative;padding:6px 0}
+.head-nav a::after{
+  content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;
+  background:currentColor;transform:scaleX(0);transform-origin:right;
+  transition:transform var(--d-fast) var(--e-out);
+}
+.head-nav a:hover::after{transform:scaleX(1);transform-origin:left}
+.head-meta{display:none}
+@media (min-width:760px){.head-meta{display:block}}
+
+#progress{
+  position:fixed;top:0;left:0;right:0;height:2px;z-index:60;
+  background:#fff;mix-blend-mode:difference;
+  transform:scaleX(0);transform-origin:left;
+}
+
+.grain{
+  position:fixed;inset:-12%;z-index:80;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift 7s steps(1) infinite;
+}
+@keyframes grainShift{
+  0%{transform:translate(0,0)}
+  12%{transform:translate(-2%,1%)}
+  25%{transform:translate(1%,-2%)}
+  37%{transform:translate(-1%,-1%)}
+  50%{transform:translate(2%,2%)}
+  62%{transform:translate(-2%,-2%)}
+  75%{transform:translate(1%,1%)}
+  87%{transform:translate(-1%,2%)}
+  100%{transform:translate(0,0)}
+}
+
+.cursor-dot,.cursor-ring{display:none}
+@media (pointer:fine){
+  body.cursor-on{cursor:none}
+  body.cursor-on a,body.cursor-on button,body.cursor-on input{cursor:none}
+  body.cursor-on .cursor-dot{
+    display:block;position:fixed;top:0;left:0;z-index:90;pointer-events:none;
+    width:7px;height:7px;margin:-3.5px 0 0 -3.5px;
+    background:#fff;mix-blend-mode:difference;border-radius:50%;
+  }
+  body.cursor-on .cursor-ring{
+    display:block;position:fixed;top:0;left:0;z-index:90;pointer-events:none;
+    width:38px;height:38px;margin:-19px 0 0 -19px;
+    will-change:transform;
+  }
+  .ring-i{
+    width:100%;height:100%;border:1px solid #fff;border-radius:50%;
+    mix-blend-mode:difference;
+    transition:transform var(--d-fast) var(--e-out),opacity var(--d-fast) var(--e-out);
+  }
+  .cursor-ring.big .ring-i{transform:scale(2.1);opacity:.9}
+}
+
+/* ============================================================
+   05 · HERO
+   ============================================================ */
+.hero{
+  min-height:100vh;min-height:100svh;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:110px var(--pad) clamp(24px,4vw,48px);
+  position:relative;
+}
+.hero-eyebrow{
+  margin-bottom:clamp(26px,4vw,48px);
+  opacity:0;transform:translateY(16px);
+  transition:opacity var(--d-base) var(--e-out) .55s,transform var(--d-base) var(--e-out) .55s;
+}
+.hero-title{
+  font-size:clamp(54px,15.5vw,196px);
+  font-weight:700;letter-spacing:-.035em;line-height:.92;
+  text-transform:uppercase;
+}
+.hero-title .serif-i{font-weight:400;font-size:.96em;letter-spacing:-.02em}
+.hl{display:block;overflow:hidden;padding-bottom:.05em;margin-bottom:-.05em}
+.hl-i{display:block;transform:translateY(115%);transition:transform var(--d-slow) var(--e-out)}
+.hl:nth-child(2) .hl-i{transition-delay:.1s}
+body.loaded .hl-i{transform:translateY(0)}
+body.loaded .hero-eyebrow,body.loaded .hero-sub,body.loaded .hero-foot{opacity:1;transform:none}
+.hero-sub{
+  max-width:340px;margin:clamp(30px,5vw,56px) 0 0 auto;
+  font-size:15px;line-height:1.6;color:var(--gray);
+  opacity:0;transform:translateY(16px);
+  transition:opacity var(--d-base) var(--e-out) .75s,transform var(--d-base) var(--e-out) .75s;
+}
+.hero-sub strong{color:var(--ink);font-weight:700}
+.hero-foot{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:12px;
+  margin-top:clamp(40px,7vw,90px);color:var(--gray);
+  opacity:0;transition:opacity var(--d-base) var(--e-out) .95s;
+}
+@media (min-width:900px){
+  .hero{justify-content:center}
+  .hero-sub{margin-top:clamp(36px,4vw,60px)}
+}
+
+/* ============================================================
+   06 · MARQUEE
+   ============================================================ */
+.marquee{
+  background:var(--ink);color:var(--bone);
+  overflow:hidden;padding:18px 0;
+  border-top:1px solid var(--ink);
+}
+.mq-track{display:flex;width:max-content;animation:mq 26s linear infinite}
+@media (hover:hover){.marquee:hover .mq-track{animation-play-state:paused}}
+.mq-group{display:flex;align-items:center;gap:34px;padding-right:34px;white-space:nowrap}
+.mq-item{font-size:13px;letter-spacing:.16em}
+.mq-star{font-size:11px;opacity:.6}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ============================================================
+   07 · THESIS · 50ms
+   ============================================================ */
+.ms-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.ms-num{
+  font-size:clamp(110px,30vw,300px);
+  font-weight:700;letter-spacing:-.05em;line-height:.82;
+  font-variant-numeric:tabular-nums;
+}
+.ms-unit{font-family:var(--font-mono);font-size:clamp(16px,3vw,28px);letter-spacing:.1em}
+.ms-sub{margin-top:18px;color:var(--gray)}
+.thesis-copy{
+  margin-top:clamp(44px,7vw,90px);
+  max-width:560px;font-size:clamp(17px,2.3vw,21px);line-height:1.55;
+}
+.manifesto{
+  margin-top:clamp(54px,8vw,110px);
+  font-size:clamp(26px,5.4vw,54px);
+  font-weight:700;letter-spacing:-.025em;line-height:1.12;
+  max-width:1100px;
+}
+.manifesto .w{opacity:.14;transition:opacity .3s linear}
+
+/* ============================================================
+   08 · PROCESS
+   ============================================================ */
+.proc-title{
+  font-size:clamp(34px,7.5vw,84px);font-weight:700;
+  letter-spacing:-.03em;line-height:1;text-transform:uppercase;
+  margin-bottom:clamp(40px,6vw,80px);
+}
+.proc-list{border-top:1px solid var(--line-bone)}
+.proc-item{border-bottom:1px solid var(--line-bone);transition:background var(--d-fast) ease,color var(--d-fast) ease}
+.proc-head{
+  width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;
+  gap:clamp(14px,3vw,34px);padding:clamp(22px,4vw,38px) 0;text-align:left;
+}
+.proc-idx{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;opacity:.55}
+.proc-name{
+  font-size:clamp(24px,5.5vw,58px);font-weight:700;
+  letter-spacing:-.025em;text-transform:uppercase;line-height:1;
+  transition:transform var(--d-fast) var(--e-out);
+}
+.plus{position:relative;width:16px;height:16px;flex:0 0 auto;transition:transform var(--d-fast) var(--e-out)}
+.plus::before,.plus::after{content:"";position:absolute;background:currentColor;top:50%;left:0;width:100%;height:1.5px;margin-top:-.75px}
+.plus::after{transform:rotate(90deg)}
+.proc-item.open .plus{transform:rotate(45deg)}
+.proc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s var(--e-io)}
+.proc-body-i{overflow:hidden}
+.proc-body-pad{
+  padding:0 0 clamp(26px,4vw,44px);
+  display:grid;gap:18px;max-width:680px;
+}
+.proc-desc{font-size:clamp(16px,2vw,19px);line-height:1.6}
+.proc-tags{display:flex;flex-wrap:wrap;gap:10px}
+.proc-tag{border:1px solid currentColor;padding:7px 14px;opacity:.75}
+.proc-item.open .proc-body{grid-template-rows:1fr}
+@media (hover:hover) and (pointer:fine){
+  .proc-item:hover{background:var(--ink);color:var(--bone)}
+  .proc-item:hover .proc-head{padding-left:14px;padding-right:14px}
+  .proc-head{transition:padding var(--d-fast) var(--e-out)}
+}
+
+/* ============================================================
+   09 · QUALITY · the non-negotiable
+   ============================================================ */
+.q-title{
+  font-size:clamp(34px,8vw,96px);font-weight:700;letter-spacing:-.03em;
+  line-height:1;text-transform:uppercase;max-width:14ch;
+}
+.q-sub{margin-top:22px;color:var(--gray);max-width:420px;font-size:16px;line-height:1.6}
+.q-panel{margin-top:clamp(44px,7vw,80px);display:grid;gap:clamp(34px,6vw,64px)}
+.q-slider-row{display:grid;gap:14px;max-width:680px}
+.q-slider-head{display:flex;justify-content:space-between;align-items:baseline}
+#budgetLabel{font-size:15px;letter-spacing:.18em}
+.range{appearance:none;-webkit-appearance:none;width:100%;height:44px;background:transparent}
+.range::-webkit-slider-runnable-track{height:2px;background:var(--line-ink)}
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;margin-top:-10px;
+  background:var(--bone);border:0;cursor:pointer;
+}
+.range::-moz-range-track{height:2px;background:var(--line-ink)}
+.range::-moz-range-thumb{width:22px;height:22px;background:var(--bone);border:0;border-radius:0;cursor:pointer}
+.range-ends{display:flex;justify-content:space-between;opacity:.5}
+.meters{display:grid;gap:26px;max-width:680px}
+.meter{display:grid;gap:10px}
+.meter-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.meter-note{opacity:.55;text-transform:none;letter-spacing:.04em;font-family:var(--font-serif);font-style:italic;font-size:13px}
+.meter-track{height:14px;border:1px solid var(--line-ink);position:relative}
+.meter-fill{position:absolute;inset:1px auto 1px 1px;background:var(--bone);width:50%;transition:width .5s var(--e-out)}
+.meter-q .meter-fill{background:var(--accent);width:calc(100% - 2px)}
+.meter-q{cursor:pointer}
+.meter-q.shake .meter-track{animation:shake .45s var(--e-out)}
+@keyframes shake{
+  10%,90%{transform:translateX(-1px)}
+  20%,80%{transform:translateX(3px)}
+  30%,50%,70%{transform:translateX(-5px)}
+  40%,60%{transform:translateX(5px)}
+}
+#qualNote{opacity:0;transition:opacity .4s ease}
+#qualNote.show{opacity:.85}
+
+/* ============================================================
+   10 · FOCUS · who it's for
+   ============================================================ */
+.focus-grid{display:grid;gap:clamp(26px,4vw,40px)}
+@media (min-width:900px){.focus-grid{grid-template-columns:repeat(3,1fr)}}
+.tile-art{
+  aspect-ratio:4/3;position:relative;overflow:hidden;
+  border:1px solid var(--line-bone);
+}
+.tile-art::before{content:"";position:absolute;inset:-22%;transition:transform var(--d-base) var(--e-out)}
+.tile:hover .tile-art::before{transform:scale(1.07) rotate(.001deg)}
+.tile-1 .tile-art::before{background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 15px)}
+.tile-2 .tile-art::before{background-image:radial-gradient(var(--ink) 1.5px,transparent 1.6px);background-size:19px 19px}
+.tile-3 .tile-art::before{background:repeating-radial-gradient(circle at 72% 28%,var(--ink) 0 1.5px,transparent 1.5px 17px)}
+.tile-num{
+  position:absolute;right:14px;bottom:6px;
+  font-size:clamp(54px,8vw,86px);font-weight:700;letter-spacing:-.04em;
+  color:var(--bone);-webkit-text-stroke:1.5px var(--ink);
+}
+.tile-name{margin-top:18px;font-size:clamp(19px,2.4vw,24px);font-weight:700;letter-spacing:-.02em;text-transform:uppercase}
+.tile-desc{margin-top:8px;color:var(--gray);font-size:15px;line-height:1.6;max-width:34ch}
+
+/* ============================================================
+   11 · CTA + FOOTER
+   ============================================================ */
+.cta{display:grid;gap:clamp(30px,5vw,50px);padding-bottom:clamp(50px,8vw,100px)}
+.cta-title{
+  font-size:clamp(44px,11vw,140px);font-weight:700;
+  letter-spacing:-.035em;line-height:.95;text-transform:uppercase;
+}
+.cta-aside{font-family:var(--font-serif);font-style:italic;font-size:clamp(17px,2.4vw,24px);color:var(--gray)}
+.btn{
+  position:relative;display:inline-block;overflow:hidden;
+  border:1px solid var(--bone);padding:20px 38px;
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+  transition:color var(--d-fast) ease;
+  justify-self:start;
+}
+.btn span{position:relative;z-index:1}
+.btn::after{
+  content:"";position:absolute;inset:0;background:var(--bone);
+  transform:scaleY(0);transform-origin:bottom;
+  transition:transform var(--d-fast) var(--e-io);
+}
+.btn:hover{color:var(--ink)}
+.btn:hover::after{transform:scaleY(1)}
+.foot-meta{
+  display:flex;flex-wrap:wrap;gap:14px 34px;
+  padding-top:clamp(34px,5vw,54px);
+  border-top:1px solid var(--line-ink);
+  color:var(--gray);
+}
+.foot-word-wrap{overflow:hidden;margin-top:clamp(30px,5vw,60px)}
+.foot-word{
+  font-size:clamp(56px,17.5vw,300px);font-weight:700;
+  letter-spacing:-.045em;line-height:.78;white-space:nowrap;
+  transform:translateY(16%);
+}
+
+/* ============================================================
+   12 · UTILITIES + MOTION SAFETY
+   ============================================================ */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity var(--d-base) var(--e-out),transform var(--d-base) var(--e-out)}
+.reveal.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+  #intro{display:none}
+  .hl-i,.reveal{transform:none;opacity:1}
+  .hero-eyebrow,.hero-sub,.hero-foot{opacity:1;transform:none}
+  .manifesto .w{opacity:1}
+  .cursor-dot,.cursor-ring{display:none!important}
+}
+</style>
+<noscript><style>
+#intro{display:none}
+.hl-i{transform:none}
+.reveal,.hero-eyebrow,.hero-sub,.hero-foot{opacity:1;transform:none}
+.manifesto .w{opacity:1}
+</style></noscript>
+</head>
+<body>
+
+<!-- INTRO · the site performs its own thesis -->
+<div id="intro" aria-hidden="true">
+  <div class="intro-top mono">
+    <span>FIRSTIMPRESSION®</span>
+    <span>HORSENS, DK</span>
+  </div>
+  <div class="intro-mid">
+    <div class="intro-count"><span id="introCount">000</span><small>MS</small></div>
+    <p class="intro-line" id="introLine">Så lang tid tager dit førstehåndsindtryk.</p>
+  </div>
+  <div class="intro-bottom mono">
+    <span>LOADER PERCEPTION</span>
+    <span>(klik for at springe over)</span>
+  </div>
+</div>
+
+<div id="progress"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-ring" aria-hidden="true"><div class="ring-i"></div></div>
+
+<header class="site-head">
+  <a class="head-brand" href="#top">firstimpression®</a>
+  <nav class="head-nav mono" aria-label="Hovednavigation">
+    <a href="#studio">Studio</a>
+    <a href="#proces">Proces</a>
+    <a href="#kontakt">Kontakt</a>
+  </nav>
+  <span class="head-meta mono">HORSENS · <span class="jstime">00:00</span></span>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow mono">Webdesign studio · Etableret med én regel</p>
+    <h1 class="hero-title">
+      <span class="hl"><span class="hl-i">Du får kun</span></span>
+      <span class="hl"><span class="hl-i"><span class="serif-i">én</span> chance.</span></span>
+    </h1>
+    <p class="hero-sub">Vi bygger websites, der vinder kunden i <strong>det første øjeblik</strong>. Og beholder dem i alle de næste.</p>
+    <div class="hero-foot mono">
+      <span>( scroll )</span>
+      <span>EST. 2026</span>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="mq-track">
+      <div class="mq-group">
+        <span class="mq-item mono">Strategi</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Visuel identitet</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Kode</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Levering</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Mobile first</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Ingen templates</span><span class="mq-star">✦</span>
+      </div>
+      <div class="mq-group">
+        <span class="mq-item mono">Strategi</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Visuel identitet</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Kode</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Levering</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Mobile first</span><span class="mq-star">✦</span>
+        <span class="mq-item mono">Ingen templates</span><span class="mq-star">✦</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- THESIS -->
+  <section class="section section-ink" id="studio">
+    <p class="eyebrow mono">01 · Tesen</p>
+    <div class="ms-row reveal">
+      <span class="ms-num"><span id="msNum">0</span></span>
+      <span class="ms-unit">MS</span>
+    </div>
+    <p class="ms-sub mono reveal" style="transition-delay:.1s">0,05 sekunder. Mindre end et blink.</p>
+    <p class="thesis-copy reveal" style="transition-delay:.15s">Det er tiden, en besøgende bruger på at dømme dit website. Før de læser et ord. Før siden er loadet færdig. Dommen falder, og resten af besøget bruger de på at bekræfte den.</p>
+    <p class="manifesto" id="manifesto">Et førstehåndsindtryk kan ikke redigeres, forhandles eller tages om. Det sker én gang, og det afgør, om kunden ringer til dig eller til den næste på listen. Vi designer til præcis det øjeblik.</p>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section" id="proces">
+    <p class="eyebrow mono">02 · Processen</p>
+    <h2 class="proc-title reveal">Fire trin.<br>Ingen genveje.</h2>
+    <div class="proc-list reveal" style="transition-delay:.1s">
+
+      <div class="proc-item">
+        <button class="proc-head" aria-expanded="false">
+          <span class="proc-idx">01</span>
+          <span class="proc-name">Strategi</span>
+          <span class="plus" aria-hidden="true"></span>
+        </button>
+        <div class="proc-body"><div class="proc-body-i"><div class="proc-body-pad">
+          <p class="proc-desc">Vi finder det ene budskab, din kunde skal forstå på fem sekunder. Alt andet på siden bygges rundt om det.</p>
+          <div class="proc-tags mono"><span class="proc-tag">Positionering</span><span class="proc-tag">Budskab</span><span class="proc-tag">Struktur</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="proc-item">
+        <button class="proc-head" aria-expanded="false">
+          <span class="proc-idx">02</span>
+          <span class="proc-name">Visuel identitet</span>
+          <span class="plus" aria-hidden="true"></span>
+        </button>
+        <div class="proc-body"><div class="proc-body-i"><div class="proc-body-pad">
+          <p class="proc-desc">Skarp typografi, præcise farver og et udtryk, der ikke kan forveksles med konkurrentens. Genkendelighed er en konkurrencefordel.</p>
+          <div class="proc-tags mono"><span class="proc-tag">Typografi</span><span class="proc-tag">Farver</span><span class="proc-tag">Udtryk</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="proc-item">
+        <button class="proc-head" aria-expanded="false">
+          <span class="proc-idx">03</span>
+          <span class="proc-name">Kode</span>
+          <span class="plus" aria-hidden="true"></span>
+        </button>
+        <div class="proc-body"><div class="proc-body-i"><div class="proc-body-pad">
+          <p class="proc-desc">Bygget i hånden. Hurtig, responsiv og uden template-støj. Mobilen først, altid, fordi det er der, dine kunder står med deres problem.</p>
+          <div class="proc-tags mono"><span class="proc-tag">Performance</span><span class="proc-tag">Mobile first</span><span class="proc-tag">SEO</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="proc-item">
+        <button class="proc-head" aria-expanded="false">
+          <span class="proc-idx">04</span>
+          <span class="proc-name">Levering</span>
+          <span class="plus" aria-hidden="true"></span>
+        </button>
+        <div class="proc-body"><div class="proc-body-i"><div class="proc-body-pad">
+          <p class="proc-desc">Live på dage, ikke måneder. Du ser fremdrift undervejs, ikke kun til sidst. Og du ejer det hele, når vi er færdige.</p>
+          <div class="proc-tags mono"><span class="proc-tag">Tempo</span><span class="proc-tag">Transparens</span><span class="proc-tag">Ejerskab</span></div>
+        </div></div></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- QUALITY -->
+  <section class="section section-ink" id="kvalitet">
+    <p class="eyebrow mono">03 · Princippet</p>
+    <h2 class="q-title reveal">Kvalitet er ikke til forhandling.</h2>
+    <p class="q-sub reveal" style="transition-delay:.1s">Træk i budgettet. Se hvad der ændrer sig. Og læg mærke til, hvad der aldrig gør.</p>
+
+    <div class="q-panel reveal" style="transition-delay:.15s">
+      <div class="q-slider-row">
+        <div class="q-slider-head mono">
+          <span>Budget</span>
+          <span id="budgetLabel">MELLEM</span>
+        </div>
+        <input class="range" type="range" id="budget" min="0" max="100" value="50" aria-label="Budget, fra lille til stort">
+        <div class="range-ends mono"><span>Lille</span><span>Stort</span></div>
+      </div>
+
+      <div class="meters">
+        <div class="meter">
+          <div class="meter-head mono"><span>Omfang</span><span id="scopeVal">·</span></div>
+          <div class="meter-track"><div class="meter-fill" id="scopeBar"></div></div>
+        </div>
+        <div class="meter">
+          <div class="meter-head mono"><span>Antal sider</span><span id="pagesVal">·</span></div>
+          <div class="meter-track"><div class="meter-fill" id="pagesBar"></div></div>
+        </div>
+        <div class="meter meter-q" id="qualMeter" title="Prøv bare.">
+          <div class="meter-head mono"><span>Kvalitet</span><span><span id="qualNote">stadig </span>100% <span class="meter-note">(altid)</span></span></div>
+          <div class="meter-track"><div class="meter-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOCUS -->
+  <section class="section" id="fokus">
+    <p class="eyebrow mono">04 · Fokus</p>
+    <h2 class="proc-title reveal">Hvem vi<br>bygger for.</h2>
+    <div class="focus-grid">
+      <div class="tile tile-1 reveal">
+        <div class="tile-art"><span class="tile-num">01</span></div>
+        <h3 class="tile-name">Håndværk &amp; byg</h3>
+        <p class="tile-desc">Tømrere, VVS og el. Kunder, der googler med et akut problem og ringer til den første side, de stoler på.</p>
+      </div>
+      <div class="tile tile-2 reveal" style="transition-delay:.1s">
+        <div class="tile-art"><span class="tile-num">02</span></div>
+        <h3 class="tile-name">E-commerce</h3>
+        <p class="tile-desc">Webshops, hvor de første 50 millisekunder afgør, om kurven bliver fyldt eller siden bliver lukket.</p>
+      </div>
+      <div class="tile tile-3 reveal" style="transition-delay:.2s">
+        <div class="tile-art"><span class="tile-num">03</span></div>
+        <h3 class="tile-name">B2B &amp; industri</h3>
+        <p class="tile-desc">Underleverandører og producenter, hvis website skal matche kvaliteten af deres maskinpark.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA + FOOTER -->
+  <section class="section section-ink cta" id="kontakt">
+    <p class="eyebrow mono">05 · Kontakt</p>
+    <h2 class="cta-title reveal">Har du et<br>projekt?</h2>
+    <p class="cta-aside reveal" style="transition-delay:.1s">(så har vi en kop kaffe)</p>
+    <a class="btn magnet reveal" style="transition-delay:.15s" href="mailto:hello@firstimpression.dk"><span>Start dit projekt&nbsp;&nbsp;↗</span></a>
+
+    <footer>
+      <div class="foot-meta mono">
+        <span>Horsens, Danmark</span>
+        <span>©2026 Firstimpression</span>
+        <span>Bygget i hånden. Ingen templates.</span>
+        <span>Lokal tid: <span class="jstime">00:00</span></span>
+      </div>
+      <div class="foot-word-wrap" aria-hidden="true">
+        <div class="foot-word">firstimpression®</div>
+      </div>
+    </footer>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  var prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var finePointer = window.matchMedia("(pointer: fine)").matches;
+
+  /* ----------------------------------------------------------
+     INTRO · count 0 to 50 ms, land the line, wipe up
+     ---------------------------------------------------------- */
+  var intro = document.getElementById("intro");
+  var introCount = document.getElementById("introCount");
+  var introLine = document.getElementById("introLine");
+  var introDone = false;
+
+  function endIntro(fast){
+    if(introDone) return;
+    introDone = true;
+    if(fast) intro.classList.add("fast");
+    intro.classList.add("done");
+    document.body.classList.add("loaded");
+    setTimeout(function(){ if(intro && intro.parentNode){ intro.parentNode.removeChild(intro); } }, 1300);
+  }
+
+  if(prefersReduced || !intro){
+    if(intro && intro.parentNode){ intro.parentNode.removeChild(intro); }
+    document.body.classList.add("loaded");
+    introDone = true;
+  } else {
+    intro.addEventListener("click", function(){ endIntro(true); });
+    var DELAY = 350, DUR = 950;
+    var t0 = performance.now();
+    function easeOutQuart(t){ return 1 - Math.pow(1 - t, 4); }
+    function tick(now){
+      if(introDone) return;
+      var p = (now - t0 - DELAY) / DUR;
+      if(p >= 1){
+        introCount.textContent = "050";
+        introLine.classList.add("show");
+        setTimeout(function(){ endIntro(false); }, 1250);
+        return;
+      }
+      if(p > 0){
+        var v = Math.round(easeOutQuart(p) * 50);
+        introCount.textContent = ("00" + v).slice(-3);
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ----------------------------------------------------------
+     REVEALS · IntersectionObserver, one shot per element
+     ---------------------------------------------------------- */
+  var reveals = document.querySelectorAll(".reveal");
+  if(prefersReduced || !("IntersectionObserver" in window)){
+    reveals.forEach(function(el){ el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.16 });
+    reveals.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ----------------------------------------------------------
+     50 MS COUNTER · runs once when the thesis enters view
+     ---------------------------------------------------------- */
+  var msNum = document.getElementById("msNum");
+  function runMsCount(){
+    var start = performance.now(), D = 1300;
+    function step(now){
+      var p = Math.min(1, (now - start) / D);
+      var eased = 1 - Math.pow(1 - p, 5);
+      msNum.textContent = String(Math.round(eased * 50));
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if(msNum){
+    if(prefersReduced || !("IntersectionObserver" in window)){
+      msNum.textContent = "50";
+    } else {
+      var msIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){ runMsCount(); msIO.disconnect(); }
+        });
+      }, { threshold: 0.4 });
+      msIO.observe(msNum);
+    }
+  }
+
+  /* ----------------------------------------------------------
+     MANIFESTO · words light up as you scroll through them
+     ---------------------------------------------------------- */
+  var manifesto = document.getElementById("manifesto");
+  var wordEls = [];
+  if(manifesto){
+    var words = manifesto.textContent.trim().split(/\s+/);
+    manifesto.innerHTML = words.map(function(w){
+      return '<span class="w">' + w + "</span>";
+    }).join(" ");
+    wordEls = Array.prototype.slice.call(manifesto.querySelectorAll(".w"));
+    if(prefersReduced){
+      wordEls.forEach(function(s){ s.style.opacity = 1; });
+    }
+  }
+  function updateWords(){
+    if(!manifesto || prefersReduced || !wordEls.length) return;
+    var r = manifesto.getBoundingClientRect();
+    var vh = window.innerHeight || 1;
+    var p = (vh * 0.88 - r.top) / (vh * 0.75);
+    p = Math.max(0, Math.min(1, p));
+    var lit = p * wordEls.length;
+    for(var i = 0; i < wordEls.length; i++){
+      var o = Math.max(0, Math.min(1, lit - i));
+      wordEls[i].style.opacity = (0.14 + o * 0.86).toFixed(2);
+    }
+  }
+
+  /* ----------------------------------------------------------
+     SCROLL LOOP · progress hairline + manifesto, rAF throttled
+     ---------------------------------------------------------- */
+  var progress = document.getElementById("progress");
+  function updateProgress(){
+    if(!progress) return;
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var p = max > 0 ? (window.scrollY || doc.scrollTop) / max : 0;
+    progress.style.transform = "scaleX(" + p + ")";
+  }
+  var ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      updateProgress();
+      updateWords();
+      ticking = false;
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll, { passive: true });
+  onScroll();
+
+  /* ----------------------------------------------------------
+     PROCESS · tap to toggle, hover opens on desktop
+     ---------------------------------------------------------- */
+  var items = Array.prototype.slice.call(document.querySelectorAll(".proc-item"));
+  function setOpen(item, open){
+    item.classList.toggle("open", open);
+    var head = item.querySelector(".proc-head");
+    if(head) head.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function openOnly(item){
+    items.forEach(function(o){ if(o !== item) setOpen(o, false); });
+    setOpen(item, true);
+  }
+  items.forEach(function(item){
+    var head = item.querySelector(".proc-head");
+    if(head){
+      head.addEventListener("click", function(){
+        if(item.classList.contains("open")){ setOpen(item, false); }
+        else { openOnly(item); }
+      });
+    }
+    if(finePointer){
+      item.addEventListener("mouseenter", function(){ openOnly(item); });
+    }
+  });
+
+  /* ----------------------------------------------------------
+     QUALITY SLIDER · scope and pages move, quality never does
+     ---------------------------------------------------------- */
+  var range = document.getElementById("budget");
+  var budgetLabel = document.getElementById("budgetLabel");
+  var scopeBar = document.getElementById("scopeBar");
+  var pagesBar = document.getElementById("pagesBar");
+  var scopeVal = document.getElementById("scopeVal");
+  var pagesVal = document.getElementById("pagesVal");
+  function updSlider(){
+    if(!range) return;
+    var v = parseFloat(range.value);
+    if(budgetLabel) budgetLabel.textContent = v < 34 ? "LILLE" : v < 67 ? "MELLEM" : "STORT";
+    if(scopeBar) scopeBar.style.width = (24 + v * 0.74) + "%";
+    if(pagesBar) pagesBar.style.width = (16 + v * 0.82) + "%";
+    if(scopeVal) scopeVal.textContent = v < 34 ? "Fokuseret" : v < 67 ? "Udvidet" : "Fuldt";
+    if(pagesVal) pagesVal.textContent = String(1 + Math.round(v / 9));
+  }
+  if(range){
+    range.addEventListener("input", updSlider);
+    updSlider();
+  }
+  var qualMeter = document.getElementById("qualMeter");
+  var qualNote = document.getElementById("qualNote");
+  var qualTimer = null;
+  if(qualMeter){
+    qualMeter.addEventListener("click", function(){
+      qualMeter.classList.remove("shake");
+      void qualMeter.offsetWidth;
+      qualMeter.classList.add("shake");
+      if(qualNote){
+        qualNote.classList.add("show");
+        if(qualTimer) clearTimeout(qualTimer);
+        qualTimer = setTimeout(function(){ qualNote.classList.remove("show"); }, 1600);
+      }
+    });
+  }
+
+  /* ----------------------------------------------------------
+     LOCAL TIME · Horsens
+     ---------------------------------------------------------- */
+  var timeEls = document.querySelectorAll(".jstime");
+  var fmt = null;
+  try {
+    fmt = new Intl.DateTimeFormat("da-DK", { timeZone: "Europe/Copenhagen", hour: "2-digit", minute: "2-digit" });
+  } catch(err){ fmt = null; }
+  function tickTime(){
+    var t = fmt ? fmt.format(new Date()) : new Date().toTimeString().slice(0,5);
+    timeEls.forEach(function(el){ el.textContent = t; });
+  }
+  if(timeEls.length){ tickTime(); setInterval(tickTime, 10000); }
+
+  /* ----------------------------------------------------------
+     CURSOR · dot follows instantly, ring follows with lerp.
+     White on difference blend, so it inverts itself everywhere.
+     Desktop only.
+     ---------------------------------------------------------- */
+  if(finePointer && !prefersReduced){
+    document.body.classList.add("cursor-on");
+    var dot = document.querySelector(".cursor-dot");
+    var ring = document.querySelector(".cursor-ring");
+    var mx = window.innerWidth / 2, my = window.innerHeight / 2;
+    var rx = mx, ry = my;
+    window.addEventListener("mousemove", function(e){
+      mx = e.clientX; my = e.clientY;
+      if(dot) dot.style.transform = "translate(" + mx + "px," + my + "px)";
+    }, { passive: true });
+    (function loop(){
+      rx += (mx - rx) * 0.16;
+      ry += (my - ry) * 0.16;
+      if(ring) ring.style.transform = "translate(" + rx + "px," + ry + "px)";
+      requestAnimationFrame(loop);
+    })();
+    var hoverables = document.querySelectorAll("a, button, input[type=range], .meter-q");
+    hoverables.forEach(function(el){
+      el.addEventListener("mouseenter", function(){ if(ring) ring.classList.add("big"); });
+      el.addEventListener("mouseleave", function(){ if(ring) ring.classList.remove("big"); });
+    });
+  }
+
+  /* ----------------------------------------------------------
+     MAGNETIC BUTTON · desktop only
+     ---------------------------------------------------------- */
+  if(finePointer && !prefersReduced){
+    document.querySelectorAll(".magnet").forEach(function(btn){
+      btn.addEventListener("mousemove", function(e){
+        var r = btn.getBoundingClientRect();
+        var x = e.clientX - r.left - r.width / 2;
+        var y = e.clientY - r.top - r.height / 2;
+        btn.style.transition = "transform .15s ease-out, color .45s ease";
+        btn.style.transform = "translate(" + (x * 0.22) + "px," + (y * 0.22) + "px)";
+      });
+      btn.addEventListener("mouseleave", function(){
+        btn.style.transition = "transform .55s cubic-bezier(.34,1.56,.64,1), color .45s ease";
+        btn.style.transform = "";
+      });
+    });
+  }
+
+  /* ----------------------------------------------------------
+     For the curious
+     ---------------------------------------------------------- */
+  try {
+    console.log("%cfirstimpression®", "font:700 22px Helvetica,Arial; color:#141412; background:#F2F0EB; padding:6px 12px;");
+    console.log("Du kiggede under motorhjelmen. Det kan vi lide. Skriv til hello@firstimpression.dk");
+  } catch(err){}
+
+})();
+</script>
+</body>
+</html>
