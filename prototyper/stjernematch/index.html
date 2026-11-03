@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--ART-START-->
+<title>Stjernematch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen phone app, max 480px wide. Night sky ground, brass accent, one colour per hensigt. Single dark theme by choice. */
+:root{
+  --bg:#0E0F1F; --bg2:#1A1C3A; --fg:#EFE9DC; --mute:#9A97B0; --line:rgba(239,233,220,.14);
+  --brass:#D9B36A;
+  --sex:#E0607A; --long:#D9B36A; --hobby:#6FB7A5;
+  --display:"Cormorant Garamond",Georgia,serif; --body:"DM Sans",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;overflow:hidden}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input{font:inherit}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+#sky{position:fixed;inset:0;z-index:0;max-width:100%}
+.app{position:relative;z-index:1;height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;justify-content:space-between;align-items:baseline;padding-block:14px 8px}
+.brand{font-family:var(--display);font-size:26px;font-weight:600;letter-spacing:.01em}
+.brand i{color:var(--brass);font-style:normal}
+.tag{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.screen{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding-block:6px 12px}
+h1{font-family:var(--display);font-weight:500;font-size:34px;line-height:1.05;margin:0;text-wrap:balance}
+h1 em{color:var(--brass);font-style:italic}
+p{margin:0}
+.muted{color:var(--mute)}
+.small{font-size:13px}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mute)}
+label.f input{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--fg);width:100%}
+.intents{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;border:1px solid var(--line);font-size:14px;font-weight:500}
+.chip::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{background:var(--c);color:#0E0F1F;border-color:var(--c)}
+.chip[aria-pressed="true"]::before{background:#0E0F1F}
+.sex{--c:var(--sex)}.long{--c:var(--long)}.hobby{--c:var(--hobby)}
+.btn{background:var(--brass);color:#0E0F1F;font-weight:600;border-radius:14px;padding:14px 18px;text-align:center}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.err{color:var(--sex);font-size:13px;min-height:1.3em}
+
+/* kort */
+.deck{position:relative;flex:1;min-height:360px}
+.card{position:absolute;inset:0;border-radius:22px;background:linear-gradient(165deg,var(--bg2),#0B0C18);border:1px solid var(--line);
+  padding:18px;display:flex;flex-direction:column;gap:12px;touch-action:none;user-select:none;will-change:transform;overflow:auto}
+.card.back{transform:scale(.95) translateY(12px);opacity:.5;pointer-events:none}
+.card .head{display:flex;gap:14px;align-items:center}
+.avatar{width:58px;height:58px;border-radius:50%;flex:none;display:grid;place-items:center;font-family:var(--display);font-size:26px;font-weight:600;color:#0E0F1F}
+.name{font-family:var(--display);font-size:28px;font-weight:600;line-height:1}
+.meta{font-size:13px;color:var(--mute);margin-top:4px}
+.sign{margin-left:auto;text-align:right}
+.sign b{display:block;font-size:28px;line-height:1;color:var(--brass);font-weight:400}
+.sign span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.bio{font-size:15px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags span{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+.meters{display:flex;flex-direction:column;gap:10px;margin-top:auto;padding-top:6px;border-top:1px solid var(--line)}
+.m{display:grid;grid-template-columns:92px 1fr 40px;gap:10px;align-items:center;font-size:13px}
+.m .bar{height:6px;border-radius:3px;background:rgba(239,233,220,.1);overflow:hidden}
+.m .bar i{display:block;height:100%;background:var(--c);width:0;transition:width .7s cubic-bezier(.16,1,.3,1)}
+.m .pct{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.m.best .pct{color:var(--c)}
+.why{font-size:12px;color:var(--mute);grid-column:1/-1;margin-top:-6px}
+.stamp{position:absolute;top:18px;right:18px;font-family:var(--display);font-size:28px;font-weight:600;letter-spacing:.04em;opacity:0;transform:rotate(8deg);transition:opacity .15s}
+.stamp.no{color:var(--sex);right:auto;left:18px;transform:rotate(-8deg)}
+.actions{display:grid;grid-template-columns:52px 1fr 1fr 1fr;gap:8px}
+.actions button{border-radius:14px;padding:12px 4px;border:1px solid var(--line);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px}
+.actions button::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.actions .skip::before{display:none}
+.actions .skip{font-size:20px;color:var(--mute)}
+.actions button.best{border-color:var(--c)}
+.empty{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:20px}
+
+/* match-overlay */
+.ov{position:fixed;inset:0;z-index:5;background:rgba(14,15,31,.92);display:flex;align-items:center;justify-content:center;padding:24px}
+.ov .box{text-align:center;display:flex;flex-direction:column;gap:14px;max-width:340px}
+.ov h2{font-family:var(--display);font-size:44px;line-height:1;margin:0;font-weight:500}
+.ov h2 em{color:var(--c);font-style:italic}
+
+/* lister */
+.row{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:var(--bg2);border:1px solid var(--line)}
+.row .avatar{width:44px;height:44px;font-size:20px}
+.row .r{flex:1;min-width:0}
+.row .r b{font-family:var(--display);font-size:20px;font-weight:600}
+.row .cat{font-size:12px;padding:4px 10px;border-radius:999px;background:var(--c);color:#0E0F1F;font-weight:600;white-space:nowrap}
+.me{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.me .big{font-size:72px;line-height:1;color:var(--brass)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px}
+.kv span:nth-child(odd){color:var(--mute)}
+
+.nav{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--line);padding-block:8px calc(8px + env(safe-area-inset-bottom,0px))}
+.nav button{padding:10px 4px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);border-radius:10px}
+.nav button[aria-current="page"]{color:var(--brass)}
+.nav b{display:block;font-family:var(--display);font-size:20px;letter-spacing:0;text-transform:none;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="app">
+  <div class="top"><div class="brand">Stjerne<i>match</i></div><div class="tag">Prototype · v0.1</div></div>
+
+  <section id="s-start" class="screen">
+    <h1>Mød dem, stjernerne <em>allerede</em> har godkendt.</h1>
+    <p class="muted">Sig, hvem du er, og hvad du leder efter. Så får du tre tal på hver person, før I mødes: sex, langsigtet og hobbyvenner.</p>
+    <label class="f">Dit fornavn<input id="in-name" type="text" autocomplete="given-name" placeholder="Michael"></label>
+    <label class="f">Din fødselsdag<input id="in-dob" type="date" min="1940-01-01" max="2008-12-31"></label>
+    <div>
+      <p class="small muted" style="margin-bottom:8px">Jeg leder efter</p>
+      <div class="intents" id="in-intents">
+        <button class="chip sex" data-c="sex" aria-pressed="true">Sex</button>
+        <button class="chip long" data-c="long" aria-pressed="true">Langsigtet</button>
+        <button class="chip hobby" data-c="hobby" aria-pressed="true">Hobbyvenner</button>
+      </div>
+    </div>
+    <p class="err" id="err"></p>
+    <button class="btn" id="go">Vis mig mine stjerner</button>
+    <p class="small muted">Beregningen bruger klassisk element- og modalitetsastrologi i forenklet form. Underholdning, ikke videnskab.</p>
+  </section>
+
+  <section id="s-discover" class="screen" hidden>
+    <div class="deck" id="deck"></div>
+    <div class="actions" id="actions">
+      <button class="skip" data-c="skip" aria-label="Spring over">✕</button>
+      <button class="sex" data-c="sex">Sex</button>
+      <button class="long" data-c="long">Lang sigt</button>
+      <button class="hobby" data-c="hobby">Hobby</button>
+    </div>
+  </section>
+
+  <section id="s-matches" class="screen" hidden></section>
+  <section id="s-me" class="screen" hidden></section>
+
+  <nav class="nav" id="nav" hidden>
+    <button data-s="discover" aria-current="page"><b>☽</b>Opdag</button>
+    <button data-s="matches"><b>✦</b>Matches</button>
+    <button data-s="me"><b>☉</b>Mig</button>
+  </nav>
+</div>
+
+<div class="ov" id="ov" hidden><div class="box">
+  <h2>Det er et <em id="ov-cat"></em> match</h2>
+  <p id="ov-text"></p>
+  <button class="btn" id="ov-ok">Skriv til <span id="ov-name"></span></button>
+  <button class="btn ghost" id="ov-more">Kig videre</button>
+</div></div>
+
+<script>
+// ---------- stjernetegn ----------
+const SIGNS=[
+ ['Vædderen','♈','ild','kardinal',321],['Tyren','♉','jord','fast',420],['Tvillingerne','♊','luft','bevægelig',521],
+ ['Krebsen','♋','vand','kardinal',621],['Løven','♌','ild','fast',723],['Jomfruen','♍','jord','bevægelig',823],
+ ['Vægten','♎','luft','kardinal',923],['Skorpionen','♏','vand','fast',1023],['Skytten','♐','ild','bevægelig',1122],
+ ['Stenbukken','♑','jord','kardinal',1222],['Vandmanden','♒','luft','fast',120],['Fiskene','♓','vand','bevægelig',219]];
+function signOf(iso){
+  const [y,m,d]=iso.split('-').map(Number), md=m*100+d; let best=-1, idx=9;
+  SIGNS.forEach((s,i)=>{ if(s[4]<=md && s[4]>best){best=s[4];idx=i;} });
+  return idx;
+}
+function ageOf(iso){ const b=new Date(iso), n=new Date(); let a=n.getFullYear()-b.getFullYear(); if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate())) a--; return a; }
+const EL={ild:{ild:82,luft:78,jord:48,vand:42},luft:{luft:80,ild:78,vand:52,jord:46},jord:{jord:80,vand:76,ild:48,luft:46},vand:{vand:84,jord:76,luft:52,ild:42}};
+const clamp=v=>Math.max(18,Math.min(97,Math.round(v)));
+function compat(a,b){
+  const A=SIGNS[a],B=SIGNS[b], base=EL[A[2]][B[2]];
+  const opp=Math.abs(a-b)===6, same=a===b, sameMod=A[3]===B[3], has=e=>A[2]===e||B[2]===e, mut=A[3]==='bevægelig'||B[3]==='bevægelig';
+  const j=((a*7+b*13)%11)-5;
+  return {
+    sex:  clamp(base+(has('ild')?8:0)+(opp?14:0)+(has('vand')?4:0)+j),
+    long: clamp(base+(has('jord')?8:0)+(sameMod?-10:8)+(same?4:0)+(opp?-4:0)-j),
+    hobby:clamp(base+(has('luft')?10:0)+(sameMod?8:-2)+(mut?4:0)+((j*3)%7)),
+    why:{
+      sex: opp?'Modsætninger. Den klassiske magnet.':has('ild')?'Ild i blandingen. Hurtig tænding, højt tempo.':A[2]==='vand'&&B[2]==='vand'?'Dybt og intenst. Ingen halve ting.':A[2]==='jord'&&B[2]==='jord'?'Sanseligt og roligt. Mere hud end fyrværkeri.':'Lunken start. Kan vokse med tiden.',
+      long: sameMod?'Samme modalitet. I vil begge styre, eller begge vente.':has('jord')?'Jord holder sammen på det. Stabilt fundament.':A[2]===B[2]?'Samme element. I forstår hinanden uden ord.':'Forskellige tempi. Kræver aftaler.',
+      hobby: has('luft')?'Luft elsker nye idéer og nye folk. Nem at lave planer med.':sameMod?'Samme rytme. I starter og stopper samtidig.':'I vil det samme, bare ikke på samme tid.'
+    }
+  };
+}
+const CAT={sex:'Sex',long:'Langsigtet',hobby:'Hobbyvenner'};
+const STYLE={ild:'Du tænder hurtigt og kører på impuls. Du har brug for nogen, der kan følge med.',jord:'Du vil mærke, at det holder. Handling over ord.',luft:'Du bliver tiltrukket af hjernen først. Samtalen er dit forspil.',vand:'Du læser folk, før de siger noget. Du vil have det dybe eller intet.'};
+
+// ---------- eksempelprofiler ----------
+const PROFILES=[
+ {n:'Sofie',dob:'1997-08-05',city:'Aarhus',km:28,bio:'Klatrer, bager surdej, hader small talk.',tags:['Klatring','Surdej','Vinterbad'],wants:'hobby',hue:340},
+ {n:'Mads',dob:'1992-11-02',city:'Horsens',km:3,bio:'Tømrer. Ser dokumentarer om rummet. Søger noget ægte.',tags:['Træværk','Astronomi','Hund'],wants:'long',hue:200},
+ {n:'Emma',dob:'1999-03-01',city:'Vejle',km:24,bio:'Sygeplejerske på nathold. Synger i brusebadet, højt.',tags:['Karaoke','Natteliv','Yoga'],wants:'sex',hue:20},
+ {n:'Jonas',dob:'1995-05-30',city:'Aarhus',km:31,bio:'Padel tirsdag, brætspil torsdag. Resten er til forhandling.',tags:['Padel','Brætspil','Kaffe'],wants:'hobby',hue:160},
+ {n:'Freja',dob:'1990-01-12',city:'Skanderborg',km:19,bio:'To børn, én kat, nul drama. Vil gerne grine igen.',tags:['Vandreture','Krimi','Vin'],wants:'long',hue:45},
+ {n:'Oliver',dob:'2001-07-18',city:'Horsens',km:2,bio:'Studerer. Laver mad til otte, selvom vi er to.',tags:['Madlavning','Fodbold','Film'],wants:'long',hue:280},
+ {n:'Ida',dob:'1993-10-08',city:'Odder',km:22,bio:'Arkitekt. Tror på gode vine og dårlige film.',tags:['Design','Vin','Kunst'],wants:'sex',hue:300},
+ {n:'Lucas',dob:'1996-04-25',city:'Aarhus',km:29,bio:'Jeg løber ikke, jeg går stærkt. Vinyl og vinterbadning.',tags:['Vinyl','Vinterbad','Gåture'],wants:'hobby',hue:120}
+].map(p=>({...p,sign:signOf(p.dob),age:ageOf(p.dob)}));
+
+// ---------- state ----------
+let user=null, seen={}, matches=[];
+try{ user=JSON.parse(localStorage.getItem('sm-user')); seen=JSON.parse(localStorage.getItem('sm-seen'))||{}; matches=JSON.parse(localStorage.getItem('sm-matches'))||[]; }catch(e){}
+function save(){ try{ localStorage.setItem('sm-user',JSON.stringify(user)); localStorage.setItem('sm-seen',JSON.stringify(seen)); localStorage.setItem('sm-matches',JSON.stringify(matches)); }catch(e){} }
+const $=s=>document.querySelector(s);
+
+// ---------- onboarding ----------
+$('#in-intents').addEventListener('click',e=>{ const b=e.target.closest('.chip'); if(b) b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true'); });
+$('#go').addEventListener('click',()=>{
+  const n=$('#in-name').value.trim(), dob=$('#in-dob').value;
+  const wants=[...document.querySelectorAll('#in-intents [aria-pressed="true"]')].map(b=>b.dataset.c);
+  if(!n||!dob){ $('#err').textContent='Vi skal bruge både navn og fødselsdag.'; return; }
+  if(!wants.length){ $('#err').textContent='Vælg mindst én ting, du leder efter.'; return; }
+  user={n,dob,wants,sign:signOf(dob)}; save(); show('discover');
+});
+
+// ---------- navigation ----------
+function show(s){
+  ['start','discover','matches','me'].forEach(k=>$('#s-'+k).hidden=k!==s);
+  $('#nav').hidden=s==='start';
+  document.querySelectorAll('#nav button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.s===s)&&b.setAttribute('aria-current','page'));
+  if(s==='discover') renderDeck(); if(s==='matches') renderMatches(); if(s==='me') renderMe();
+}
+$('#nav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) show(b.dataset.s); });
+
+// ---------- kort ----------
+const avatar=p=>`<div class="avatar" style="background:hsl(${p.hue} 55% 72%)">${p.n[0]}</div>`;
+function queue(){ return PROFILES.filter(p=>!seen[p.n]); }
+function cardHTML(p,back){
+  const c=compat(user.sign,p.sign), S=SIGNS[p.sign];
+  const best=['sex','long','hobby'].filter(k=>user.wants.includes(k)).sort((a,b)=>c[b]-c[a])[0];
+  const row=k=>`<div class="m ${k} ${k===best?'best':''}"><span>${CAT[k]}</span><div class="bar"><i data-w="${c[k]}"></i></div><span class="pct">${c[k]}%</span><span class="why">${c.why[k]}</span></div>`;
+  return `<article class="card ${back?'back':''}" data-n="${p.n}" data-best="${best}">
+    <div class="stamp" id="st-yes">Ja</div><div class="stamp no" id="st-no">Nej</div>
+    <div class="head">${avatar(p)}<div><div class="name">${p.n}, ${p.age}</div><div class="meta">${p.city} · ${p.km} km</div></div>
+      <div class="sign"><b>${S[1]}</b><span>${S[0]}</span></div></div>
+    <p class="bio">${p.bio}</p>
+    <div class="tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+    <div class="meters">${user.wants.map(row).join('')}</div>
+  </article>`;
+}
+function renderDeck(){
+  const q=queue(), deck=$('#deck');
+  $('#actions').hidden=!q.length;
+  if(!q.length){ deck.innerHTML=`<div class="empty"><p class="big" style="font-size:48px;color:var(--brass)">☾</p><h1>Ingen flere i nærheden i nat.</h1><p class="muted">Stjernerne drejer videre i morgen.</p><button class="btn ghost" id="reset">Start forfra med de samme otte</button></div>`;
+    $('#reset').onclick=()=>{ seen={}; save(); renderDeck(); }; return; }
+  deck.innerHTML=(q[1]?cardHTML(q[1],true):'')+cardHTML(q[0]);
+  requestAnimationFrame(()=>deck.querySelectorAll('.card:not(.back) .bar i').forEach(i=>i.style.width=i.dataset.w+'%'));
+  const top=deck.querySelector('.card:not(.back)');
+  document.querySelectorAll('#actions button').forEach(b=>b.classList.toggle('best',b.dataset.c===top.dataset.best));
+  drag(top);
+}
+function decide(p,c){
+  seen[p.n]=c;
+  if(c!=='skip'){ const score=compat(user.sign,p.sign)[c]; if(p.wants===c||score>=80){ matches.push({n:p.n,c,score}); save(); return overlay(p,c,score); } }
+  save(); renderDeck();
+}
+$('#actions').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const p=queue()[0]; if(p) fly(b.dataset.c==='skip'?-1:1,()=>decide(p,b.dataset.c)); });
+function fly(dir,cb){ const t=$('#deck .card:not(.back)'); if(!t) return cb(); t.style.transition='transform .35s ease-in,opacity .35s'; t.style.transform=`translateX(${dir*120}%) rotate(${dir*18}deg)`; t.style.opacity=0; setTimeout(cb,320); }
+function drag(el){
+  let x0=0, dx=0, on=false;
+  el.addEventListener('pointerdown',e=>{ on=true; x0=e.clientX; el.setPointerCapture(e.pointerId); el.style.transition='none'; });
+  el.addEventListener('pointermove',e=>{ if(!on) return; dx=e.clientX-x0; el.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;
+    el.querySelector('#st-yes').style.opacity=Math.min(1,Math.max(0,dx-20)/70); el.querySelector('#st-no').style.opacity=Math.min(1,Math.max(0,-dx-20)/70); });
+  el.addEventListener('pointerup',()=>{ if(!on) return; on=false; const p=queue()[0];
+    if(dx>90) fly(1,()=>decide(p,el.dataset.best)); else if(dx<-90) fly(-1,()=>decide(p,'skip'));
+    else { el.style.transition='transform .3s'; el.style.transform=''; el.querySelector('#st-yes').style.opacity=0; el.querySelector('#st-no').style.opacity=0; } dx=0; });
+}
+
+// ---------- match ----------
+function overlay(p,c,score){
+  const ov=$('#ov'); ov.className='ov '+c; $('#ov-cat').textContent=CAT[c].toLowerCase(); $('#ov-name').textContent=p.n;
+  $('#ov-text').textContent=`${p.n} leder også efter ${CAT[c].toLowerCase()}. Stjernerne giver jer ${score}%. Resten er op til jer.`;
+  ov.hidden=false;
+}
+$('#ov-ok').onclick=$('#ov-more').onclick=()=>{ $('#ov').hidden=true; renderDeck(); };
+
+// ---------- matches + mig ----------
+function renderMatches(){
+  const s=$('#s-matches');
+  s.innerHTML=`<h1>Dine <em>${matches.length}</em> matches</h1>`+(matches.length?matches.map(m=>{ const p=PROFILES.find(x=>x.n===m.n);
+    return `<div class="row ${m.c}">${avatar(p)}<div class="r"><b>${p.n}, ${p.age}</b><div class="small muted">${SIGNS[p.sign][1]} ${SIGNS[p.sign][0]} · ${m.score}%</div></div><span class="cat">${CAT[m.c]}</span></div>`; }).join('')
+    :`<p class="muted">Ingen endnu. Swipe til højre, eller tryk på den hensigt du vil matche på.</p>`);
+}
+function renderMe(){
+  const S=SIGNS[user.sign];
+  $('#s-me').innerHTML=`<div class="me"><div class="big">${S[1]}</div><h1>${user.n}, du er <em>${S[0]}</em>.</h1><p>${STYLE[S[2]]}</p>
+    <div class="kv"><span>Element</span><span>${S[2]}</span><span>Modalitet</span><span>${S[3]}</span><span>Fødselsdag</span><span>${user.dob}</span><span>Leder efter</span><span>${user.wants.map(k=>CAT[k]).join(', ')}</span></div>
+    <button class="btn ghost" id="logout">Ret profil</button></div>`;
+  $('#logout').onclick=()=>{ user=null; seen={}; matches=[]; try{localStorage.clear()}catch(e){} show('start'); };
+}
+
+// ---------- stjernehimmel ----------
+(function(){ const c=$('#sky'), g=c.getContext('2d'); function draw(){ c.width=innerWidth; c.height=innerHeight; g.clearRect(0,0,c.width,c.height);
+  for(let i=0;i<160;i++){ const r=Math.random()*1.3+.2; g.fillStyle=`rgba(239,233,220,${Math.random()*.6+.15})`; g.beginPath(); g.arc(Math.random()*c.width,Math.random()*c.height,r,0,7); g.fill(); } }
+  draw(); addEventListener('resize',draw); })();
+
+show(user?'discover':'start');
+</script>
+<!--ART-END-->
+</body>
+</html>
